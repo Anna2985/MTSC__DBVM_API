@@ -1,0 +1,218 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Basic;
+using HIS_DB_Lib;
+using SQLUI;
+using MySql.Data.MySqlClient;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace DB2VM_API.Controller._API_處方取得
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BBAR : ControllerBase
+    {
+        static public string API_Server = "http://127.0.0.1:4433";
+        static public string Server = "127.0.0.1";
+        static public string DB = "dbvm_his";
+        static public string UserName = "his_user";
+        static public string Password = "hson11486";
+        static public uint Port = 3306;
+        static private MySqlSslMode SSLMode = MySqlSslMode.None;
+
+        [HttpGet]
+        public string get_order(string? BarCode)
+        {
+            MyTimerBasic myTimerBasic = new MyTimerBasic();
+            returnData returnData = new returnData();
+            try
+            {
+                if (BarCode.StringIsEmpty())
+                {
+                    returnData.Code = -200;
+                    returnData.Result = "Barcode空白";
+                    return returnData.JsonSerializationt(true);
+                }
+                SQLControl sQLControl_med_carInfo = new SQLControl(Server, DB, "yc_pha_order", UserName, Password, Port, SSLMode);
+                //List<object[]> list_pha_order = sQLControl_med_carInfo.GetAllRows(null);
+                List<object[]> list_pha_order = sQLControl_med_carInfo.GetRowsByDefult(null, (int)enum_yc_pha_order.ST_HISORDKEY, BarCode);
+                List<object[]> string_pha_order = new List<object[]>();
+                foreach (var order in list_pha_order)
+                {
+                    object[] stringifiedOrder = Array.ConvertAll(order, item => item?.ToString() ?? string.Empty);
+                    string_pha_order.Add(stringifiedOrder);
+                }
+                List<phaOrderClass> sql_medCar = string_pha_order.SQLToClass<phaOrderClass, enum_yc_pha_order>();
+
+
+                //orderlistClass orderlistClass = orderlistClass.get_order(BarCode);
+                //List<medClass> medClasses = medClass.get_med_cloud(API_Server);
+                //List<OrderClass> orderClasses = new List<OrderClass>();
+
+                //foreach (var medicationItems in orderlistClass.medicationItems)
+                //{
+                //    medClass targetMed = medClasses.Where(temp => temp.料號 == medicationItems.料號).FirstOrDefault();
+                //    if (targetMed == null) 
+                //    {
+                //        targetMed = new medClass();
+                //        targetMed.藥品碼 = medicationItems.料號;
+                //    }
+                //    string 開方日期 = "";
+                //    //DateTime dd = orderlistClass.orderDate.StringToDateTime();
+                //    //string sqlFormattedDate = dd.ToString("yyyy-MM-dd HH:mm:ss");
+                //    if (orderlistClass.開方日期.StringIsEmpty() == false)
+                //    {
+                //        開方日期 = orderlistClass.開方日期;
+                //    }
+                //    else
+                //    {
+                //        開方日期 = orderlistClass.orderDate;
+                //    }
+                //    OrderClass orderClass = new OrderClass
+                //    {
+                //        PRI_KEY = BarCode,
+                //        藥袋條碼 = BarCode,
+                //        開方日期 = 開方日期,
+                //        病歷號 = orderlistClass.病歷號.ToString(),
+                //        領藥號 = orderlistClass.領藥號.ToString(),
+                //        病人姓名 = orderlistClass.病人姓名,
+                //        藥品碼 = targetMed.藥品碼,
+                //        藥品名稱 = medicationItems.藥品名稱,
+                //        單次劑量 = medicationItems.單次劑量.ToString(),
+                //        頻次 = medicationItems.頻次,
+                //        途徑 = medicationItems.途徑,
+                //        交易量 = ((int)Math.Ceiling(medicationItems.交易量)*-1).ToString(),
+                //        批序 = medicationItems.批序.ToString(),
+                //        藥袋類型 = medicationItems.藥袋類型,
+                //        病房 = orderlistClass.病房,
+                //        床號 = orderlistClass.床號,
+                //        狀態 = "未過帳"                        
+                //    };
+                //    if (orderClass.藥袋類型 == "A") orderClass.藥袋類型 = "New";
+                //    if (orderClass.藥袋類型 == "D") orderClass.藥袋類型 = "DC";
+                //    orderClasses.Add(orderClass);
+                //}
+                ////medCarInfoClass.update_order_list(API_Server, orderClasses);
+                //List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
+                returnData.Data = sql_medCar;
+                //returnData.Code = 200;
+                //returnData.Result = $"取得醫令資料{orderClasses.Count}筆資料";
+                return returnData.JsonSerializationt(true);
+            }
+            catch(Exception ex)
+            {
+                returnData.Code = -200;
+                returnData.Result = $"Exception:{ex.Message}";
+                return returnData.JsonSerializationt(true);
+            }
+        }
+        [HttpGet("date")]
+        public string get_order_by_date(string? date)
+        {
+            MyTimerBasic myTimerBasic = new MyTimerBasic();
+            returnData returnData = new returnData();
+            try
+            {
+                if (date.StringIsEmpty())
+                {
+                    returnData.Code = -200;
+                    returnData.Result = "date空白";
+                    return returnData.JsonSerializationt(true);
+                }
+                List<orderlistClass> orderlistClasses = orderlistClass.get_order_by_date(date);
+                List<medClass> medClasses = medClass.get_med_cloud(API_Server);
+                Dictionary<string, List<medClass>> medClassDict = medClass.CoverToDictionaryByCode(medClasses);
+                List<OrderClass> orderClasses = new List<OrderClass>();
+                foreach(orderlistClass orderlistClass in orderlistClasses)
+                {
+                    foreach (var medicationItems in orderlistClass.medicationItems)
+                    {
+                        medClass targetMed = medClasses.Where(temp => temp.料號 == medicationItems.料號).FirstOrDefault();
+                        if (targetMed == null)
+                        {
+                            targetMed = new medClass();
+                            targetMed.藥品碼 = medicationItems.料號;
+                        }
+                        string 開方日期 = "";
+                        //DateTime dd = orderlistClass.orderDate.StringToDateTime();
+                        //string sqlFormattedDate = dd.ToString("yyyy-MM-dd HH:mm:ss");
+                        if (orderlistClass.開方日期.StringIsEmpty() == false)
+                        {
+                            開方日期 = orderlistClass.開方日期;
+                        }
+                        else
+                        {
+                            開方日期 = orderlistClass.orderDate;
+                        }
+                        OrderClass orderClass = new OrderClass
+                        {
+                            PRI_KEY = orderlistClass.藥袋條碼,
+                            藥袋條碼 = orderlistClass.藥袋條碼,
+                            開方日期 = 開方日期,
+                            病歷號 = orderlistClass.病歷號.ToString(),
+                            領藥號 = orderlistClass.領藥號.ToString(),
+                            病人姓名 = orderlistClass.病人姓名,
+                            藥品碼 = targetMed.藥品碼,
+                            藥品名稱 = medicationItems.藥品名稱,
+                            單次劑量 = medicationItems.單次劑量.ToString(),
+                            頻次 = medicationItems.頻次,
+                            途徑 = medicationItems.途徑,
+                            交易量 = (medicationItems.交易量 * -1).ToString(),
+                            批序 = medicationItems.批序.ToString(),
+                            藥袋類型 = medicationItems.藥袋類型,
+                            病房 = orderlistClass.病房,
+                            床號 = orderlistClass.床號,
+                            狀態 = "未過帳"
+                        };
+                        if (orderClass.藥袋類型 == "A") orderClass.藥袋類型 = "New";
+                        if (orderClass.藥袋類型 == "D") orderClass.藥袋類型 = "DC";
+                        orderClasses.Add(orderClass);
+                    }
+                }
+               
+                //medCarInfoClass.update_order_list(API_Server, orderClasses);
+                //List<OrderClass> update_OrderClass = medCarInfoClass.update_order_list(API_Server, orderClasses);
+                returnData.Data = orderClasses;
+                returnData.Code = 200;
+                return returnData.JsonSerializationt(true);
+            }
+            catch (Exception ex)
+            {
+                returnData.Code = -200;
+                returnData.Result = $"Exception:{ex.Message}";
+                return returnData.JsonSerializationt(true);
+            }
+        }
+        [HttpPost("get_order")]
+        public string get_order([FromBody] returnData returnData)
+        {
+            List<orderlistClass> orderlistClasses = returnData.Data.ObjToClass<List<orderlistClass>>();
+            List<OrderClass> orderClasses = new List<OrderClass>();
+            foreach (var orderlistClass in orderlistClasses)
+            {
+                foreach(var medicationItems in orderlistClass.medicationItems)
+                {
+                    OrderClass orderClass = new OrderClass
+                    {
+                        開方日期 = orderlistClass.開方日期.StringToDateTime().ToDateTimeString(),
+                        病歷號 = orderlistClass.病歷號.ToString(),
+                        藥品碼 = medicationItems.料號,
+                        藥品名稱 = medicationItems.藥品名稱,
+                        單次劑量 = medicationItems.單次劑量.ToString(),
+                        頻次 = medicationItems.頻次,
+                        途徑 = medicationItems.途徑,
+                        交易量 = medicationItems.交易量.ToString()
+                    };
+                    orderClasses.Add(orderClass);
+                }               
+            }
+            returnData.Data = orderClasses;
+            return returnData.JsonSerializationt(true);
+        }
+    }
+
+}
