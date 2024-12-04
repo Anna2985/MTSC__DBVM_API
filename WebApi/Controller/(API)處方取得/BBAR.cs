@@ -38,8 +38,7 @@ namespace DB2VM_API.Controller._API_處方取得
                     return returnData.JsonSerializationt(true);
                 }
                 SQLControl sQLControl_med_carInfo = new SQLControl(Server, DB, "yc_pha_order", UserName, Password, Port, SSLMode);
-                //List<object[]> list_pha_order = sQLControl_med_carInfo.GetAllRows(null);
-                List<object[]> list_pha_order = sQLControl_med_carInfo.GetRowsByDefult(null, (int)enum_yc_pha_order.ST_HISORDKEY, BarCode);
+                List<object[]> list_pha_order = sQLControl_med_carInfo.GetRowsByDefult(null, (int)enum_yc_pha_order.ST_QRCODE, BarCode);
                 List<object[]> string_pha_order = new List<object[]>();
                 foreach (var order in list_pha_order)
                 {
@@ -47,57 +46,42 @@ namespace DB2VM_API.Controller._API_處方取得
                     string_pha_order.Add(stringifiedOrder);
                 }
                 List<phaOrderClass> sql_medCar = string_pha_order.SQLToClass<phaOrderClass, enum_yc_pha_order>();
+                List<OrderClass> orderClasses = new List<OrderClass>();
+                foreach (phaOrderClass phaOrderClass in sql_medCar)
+                {
+                    if (phaOrderClass.CD_FROM == "O") phaOrderClass.CD_FROM = "門診";
+                    if (phaOrderClass.CD_FROM == "E") phaOrderClass.CD_FROM = "急診";
+                    if (phaOrderClass.CD_FROM == "I") phaOrderClass.CD_FROM = "住院";
+                    if (phaOrderClass.CD_CANCEL == "N") phaOrderClass.CD_FROM = "New";
+                    if (phaOrderClass.CD_CANCEL == "Y") phaOrderClass.CD_FROM = "DC";
+
+                    OrderClass orderClass = new OrderClass
+                    {
+                        PRI_KEY = BarCode,
+                        藥袋條碼 = BarCode,
+                        開方日期 = phaOrderClass.DM_DRUG,
+                        病歷號 = phaOrderClass.ID_PATIENT,
+                        領藥號 = phaOrderClass.IT_DRUGNO,
+                        病人姓名 = phaOrderClass.NM_PATIENT,
+                        藥品碼 = phaOrderClass.ID_DRUG,
+                        藥品名稱 = phaOrderClass.NM_DRUG,
+                        單次劑量 = phaOrderClass.DB_DOSE,
+                        //頻次 = sql_medCar[0],
+                        途徑 = phaOrderClass.ST_PATH,
+                        交易量 = ((phaOrderClass.DB_AMOUNT.StringToInt32())*-1).ToString(),
+                        //批序 = medicationItems.批序.ToString(),
+                        藥袋類型 = phaOrderClass.CD_FROM,
+                        //病房 = orderlistClass.病房,
+                        床號 = phaOrderClass.ST_BEDNO,
+                        狀態 = "未過帳"
+                    };
+                    orderClasses.Add(orderClass);
+                }
+                
 
 
-                //orderlistClass orderlistClass = orderlistClass.get_order(BarCode);
-                //List<medClass> medClasses = medClass.get_med_cloud(API_Server);
-                //List<OrderClass> orderClasses = new List<OrderClass>();
-
-                //foreach (var medicationItems in orderlistClass.medicationItems)
-                //{
-                //    medClass targetMed = medClasses.Where(temp => temp.料號 == medicationItems.料號).FirstOrDefault();
-                //    if (targetMed == null) 
-                //    {
-                //        targetMed = new medClass();
-                //        targetMed.藥品碼 = medicationItems.料號;
-                //    }
-                //    string 開方日期 = "";
-                //    //DateTime dd = orderlistClass.orderDate.StringToDateTime();
-                //    //string sqlFormattedDate = dd.ToString("yyyy-MM-dd HH:mm:ss");
-                //    if (orderlistClass.開方日期.StringIsEmpty() == false)
-                //    {
-                //        開方日期 = orderlistClass.開方日期;
-                //    }
-                //    else
-                //    {
-                //        開方日期 = orderlistClass.orderDate;
-                //    }
-                //    OrderClass orderClass = new OrderClass
-                //    {
-                //        PRI_KEY = BarCode,
-                //        藥袋條碼 = BarCode,
-                //        開方日期 = 開方日期,
-                //        病歷號 = orderlistClass.病歷號.ToString(),
-                //        領藥號 = orderlistClass.領藥號.ToString(),
-                //        病人姓名 = orderlistClass.病人姓名,
-                //        藥品碼 = targetMed.藥品碼,
-                //        藥品名稱 = medicationItems.藥品名稱,
-                //        單次劑量 = medicationItems.單次劑量.ToString(),
-                //        頻次 = medicationItems.頻次,
-                //        途徑 = medicationItems.途徑,
-                //        交易量 = ((int)Math.Ceiling(medicationItems.交易量)*-1).ToString(),
-                //        批序 = medicationItems.批序.ToString(),
-                //        藥袋類型 = medicationItems.藥袋類型,
-                //        病房 = orderlistClass.病房,
-                //        床號 = orderlistClass.床號,
-                //        狀態 = "未過帳"                        
-                //    };
-                //    if (orderClass.藥袋類型 == "A") orderClass.藥袋類型 = "New";
-                //    if (orderClass.藥袋類型 == "D") orderClass.藥袋類型 = "DC";
-                //    orderClasses.Add(orderClass);
-                //}
-                ////medCarInfoClass.update_order_list(API_Server, orderClasses);
-                //List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
+            
+                List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
                 returnData.Data = sql_medCar;
                 //returnData.Code = 200;
                 //returnData.Result = $"取得醫令資料{orderClasses.Count}筆資料";

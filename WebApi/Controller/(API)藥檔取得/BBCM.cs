@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Basic;
 using HIS_DB_Lib;
+using System.Text;
+using System.IO;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -63,6 +65,12 @@ namespace DB2VM_API.Controller._API_藥檔取得
                 returnData.Result = ex.Message;
                 return returnData.JsonSerializationt(true);
             }       
-        }       
+        }   
+        private List<medClass> ExcuteEXCELL()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            string filePath = @"C: \Users\Administrator\OneDrive\4.國軍新竹\medPage.xlsx";
+            using()
+        }
     }
 }
