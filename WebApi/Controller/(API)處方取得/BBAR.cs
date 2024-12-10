@@ -82,7 +82,7 @@ namespace DB2VM_API.Controller._API_處方取得
 
             
                 List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
-                returnData.Data = sql_medCar;
+                returnData.Data = orderClasses;
                 returnData.Code = 200;
                 returnData.Result = $"取得醫令資料{orderClasses.Count}筆資料";
                 return returnData.JsonSerializationt(true);
