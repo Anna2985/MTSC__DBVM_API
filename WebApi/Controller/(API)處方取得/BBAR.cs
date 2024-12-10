@@ -69,7 +69,7 @@ namespace DB2VM_API.Controller._API_處方取得
                         //頻次 = sql_medCar[0],
                         途徑 = phaOrderClass.ST_PATH,
                         交易量 = ((phaOrderClass.DB_AMOUNT.StringToInt32())*-1).ToString(),
-                        //批序 = medicationItems.批序.ToString(),
+                        批序 = phaOrderClass.DateTimeSeq,
                         藥袋類型 = phaOrderClass.CD_FROM,
                         //病房 = orderlistClass.病房,
                         床號 = phaOrderClass.ST_BEDNO,
@@ -83,8 +83,8 @@ namespace DB2VM_API.Controller._API_處方取得
             
                 List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
                 returnData.Data = sql_medCar;
-                //returnData.Code = 200;
-                //returnData.Result = $"取得醫令資料{orderClasses.Count}筆資料";
+                returnData.Code = 200;
+                returnData.Result = $"取得醫令資料{orderClasses.Count}筆資料";
                 return returnData.JsonSerializationt(true);
             }
             catch(Exception ex)
