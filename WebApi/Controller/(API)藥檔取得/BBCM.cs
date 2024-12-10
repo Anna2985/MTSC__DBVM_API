@@ -25,34 +25,11 @@ namespace DB2VM_API.Controller._API_藥檔取得
             returnData returnData = new returnData();
             try
             {
-                List<medicineClass> medicineClasses = medicineClass.get_med(code);
-
-                List<medClass> medClasses = new List<medClass>();
-                foreach (var medicineClass in medicineClasses)
-                {
-                    medClass medClass = new medClass
-                    {
-                        藥品碼 = medicineClass.藥品碼,
-                        藥品名稱 = medicineClass.藥品名稱,
-                        藥品學名 = medicineClass.藥品學名,
-                        中文名稱 = medicineClass.中文名稱,
-                        最小包裝單位 = medicineClass.最小包裝單位,
-                        包裝單位 = medicineClass.最小包裝單位,
-                        警訊藥品 = medicineClass.警訊藥品.ToString(),
-                        管制級別 = medicineClass.管制級別.ToString(),
-                        開檔狀態 = medicineClass.開檔狀態,
-                        料號 = medicineClass.料號.Trim(),
-                        ATC = medicineClass.healthInsurance.ATC,
-                        中西藥 = "西藥"
-                    };
-                    if (medClass.管制級別 == "0") medClass.管制級別 = "N";
-                    if (medClass.開檔狀態 == "N") medClass.開檔狀態 = "停用中";
-                    if (medClass.開檔狀態 == "Y") medClass.開檔狀態 = "開檔中";
-                    if(medClass.料號.StringIsEmpty() == false && medClass.藥品碼.StringIsEmpty() == false) medClasses.Add(medClass);
-
-                }
-
+                //List<medClass> medClasses = new List<medClass>();
+                List<medClass> medClasses = ExcuteEXCELL();
                 medClass.add_med_clouds(API_Server, medClasses);
+                //string url = @"https://www1.ndmctsgh.edu.tw/pharm/API/MedMainOnline/GetMedSearch?selecttype=EngName&content=Candis";
+                //string json_out = Basic.Net.WEBApiGet(url);
                 returnData.Code = 200;
                 returnData.Result = $"取得藥品資料共{medClasses.Count}筆";
                 returnData.TimeTaken = $"{myTimerBasic}";
@@ -68,9 +45,33 @@ namespace DB2VM_API.Controller._API_藥檔取得
         }   
         private List<medClass> ExcuteEXCELL()
         {
+            List<medClass> medClasses = new List<medClass>();
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            string filePath = @"C: \Users\Administrator\OneDrive\4.國軍新竹\medPage.xlsx";
-            using()
+            string filePath = @"C:\Users\user\source\repos\MTSC__DBVM_API\WebApi\medPage.xlsx"; ;
+            using (StreamReader sr = new StreamReader(filePath, Encoding.GetEncoding("Big5")))
+            {
+                sr.ReadLine();
+                while (!sr.EndOfStream)
+                {
+                    string row = sr.ReadLine();
+                    string[] values = row.Split(",");
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        values[i] = values[i].Trim('"');
+                    }
+                    medClass medClass = new medClass
+                    {
+                        藥品碼 = values[0],
+                        藥品名稱 = values[1],
+                        包裝單位 = values[3],
+                        中西藥 = "西藥"
+                    };
+                    medClasses.Add(medClass);
+                }
+            }
+            return medClasses;
+
+            
         }
     }
 }
