@@ -55,12 +55,13 @@ namespace DB2VM_API.Controller._API_處方取得
                     if (phaOrderClass.CD_FROM == "I") phaOrderClass.CD_FROM = "住院";
                     if (phaOrderClass.CD_CANCEL == "N") phaOrderClass.CD_FROM = "New";
                     if (phaOrderClass.CD_CANCEL == "Y") phaOrderClass.CD_FROM = "DC";
-
+                    string dateTime = $"{phaOrderClass.DM_DRUG.Substring(0,4)}-{phaOrderClass.DM_DRUG.Substring(4, 2)}-{phaOrderClass.DM_DRUG.Substring(6, 2)}" +
+                        $" {phaOrderClass.DM_DRUG.Substring(8, 2)}:{phaOrderClass.DM_DRUG.Substring(10, 2)}:{phaOrderClass.DM_DRUG.Substring(12, 2)}";
                     OrderClass orderClass = new OrderClass
                     {
                         PRI_KEY = BarCode,
                         藥袋條碼 = BarCode,
-                        開方日期 = phaOrderClass.DM_DRUG,
+                        開方日期 = dateTime,                      
                         病歷號 = phaOrderClass.ID_PATIENT,
                         領藥號 = phaOrderClass.IT_DRUGNO,
                         病人姓名 = phaOrderClass.NM_PATIENT,
