@@ -37,8 +37,9 @@ namespace DB2VM_API.Controller._API_處方取得
                     returnData.Result = "Barcode空白";
                     return returnData.JsonSerializationt(true);
                 }
+                BarCode += "%"; 
                 SQLControl sQLControl_med_carInfo = new SQLControl(Server, DB, "yc_pha_order", UserName, Password, Port, SSLMode);
-                List<object[]> list_pha_order = sQLControl_med_carInfo.GetRowsByDefult(null, (int)enum_yc_pha_order.ST_QRCODE, BarCode);
+                List<object[]> list_pha_order = sQLControl_med_carInfo.GetRowsByLike(null, enum_yc_pha_order.ST_QRCODE.GetEnumName(), BarCode);
                 List<object[]> string_pha_order = new List<object[]>();
                 foreach (var order in list_pha_order)
                 {
