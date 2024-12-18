@@ -71,7 +71,7 @@ namespace DB2VM_API
     public class phaOrderClass
     {
         [JsonPropertyName("DATETIMESEQ")]
-        public string DateTimeSeq { get; set; }
+        public string DATETIMESEQ { get; set; }
 
         [JsonPropertyName("ID_PATIENT")]
         public string ID_PATIENT { get; set; }

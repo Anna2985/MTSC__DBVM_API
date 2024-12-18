@@ -61,7 +61,7 @@ namespace DB2VM_API.Controller._API_處方取得
                     {
                         PRI_KEY = BarCode,
                         藥袋條碼 = BarCode,
-                        開方日期 = dateTime,                      
+                        開方日期 = dateTime,
                         病歷號 = phaOrderClass.ID_PATIENT,
                         領藥號 = phaOrderClass.IT_DRUGNO,
                         病人姓名 = phaOrderClass.NM_PATIENT,
@@ -70,8 +70,9 @@ namespace DB2VM_API.Controller._API_處方取得
                         單次劑量 = phaOrderClass.DB_DOSE,
                         //頻次 = sql_medCar[0],
                         途徑 = phaOrderClass.ST_PATH,
-                        交易量 = ((phaOrderClass.DB_AMOUNT.StringToInt32())*-1).ToString(),
-                        批序 = phaOrderClass.DateTimeSeq,
+                        交易量 = $"-{phaOrderClass.DB_AMOUNT}",
+                        //交易量 = ((phaOrderClass.DB_AMOUNT).ToString(),
+                        批序 = phaOrderClass.DATETIMESEQ,
                         藥袋類型 = phaOrderClass.CD_FROM,
                         //病房 = orderlistClass.病房,
                         床號 = phaOrderClass.ST_BEDNO,
@@ -86,7 +87,7 @@ namespace DB2VM_API.Controller._API_處方取得
                 List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
                 returnData.Data = update_OrderClass;
                 returnData.Code = 200;
-                returnData.Result = $"取得醫令資料{orderClasses.Count}筆資料";
+                returnData.Result = $"取得醫令資料{update_OrderClass.Count}筆資料";
                 return returnData.JsonSerializationt(true);
             }
             catch(Exception ex)
