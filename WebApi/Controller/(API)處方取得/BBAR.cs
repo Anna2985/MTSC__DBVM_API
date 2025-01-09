@@ -37,7 +37,7 @@ namespace DB2VM_API.Controller._API_處方取得
                     returnData.Result = "Barcode空白";
                     return returnData.JsonSerializationt(true);
                 }
-                BarCode += "%"; 
+                //BarCode += "%"; 
                 SQLControl sQLControl_med_carInfo = new SQLControl(Server, DB, "yc_pha_order", UserName, Password, Port, SSLMode);
                 List<object[]> list_pha_order = sQLControl_med_carInfo.GetRowsByLike(null, enum_yc_pha_order.ST_QRCODE.GetEnumName(), BarCode);
                 List<object[]> string_pha_order = new List<object[]>();
@@ -57,6 +57,10 @@ namespace DB2VM_API.Controller._API_處方取得
                     if (phaOrderClass.CD_CANCEL == "Y") phaOrderClass.CD_FROM = "DC";
                     string dateTime = $"{phaOrderClass.DM_DRUG.Substring(0,4)}-{phaOrderClass.DM_DRUG.Substring(4, 2)}-{phaOrderClass.DM_DRUG.Substring(6, 2)}" +
                         $" {phaOrderClass.DM_DRUG.Substring(8, 2)}:{phaOrderClass.DM_DRUG.Substring(10, 2)}:{phaOrderClass.DM_DRUG.Substring(12, 2)}";
+                    if(phaOrderClass.CD_CANCEL == "Y")
+                    {
+
+                    }
                     OrderClass orderClass = new OrderClass
                     {
                         PRI_KEY = BarCode,
@@ -73,11 +77,19 @@ namespace DB2VM_API.Controller._API_處方取得
                         交易量 = $"-{phaOrderClass.DB_AMOUNT}",
                         //交易量 = ((phaOrderClass.DB_AMOUNT).ToString(),
                         批序 = phaOrderClass.DATETIMESEQ,
-                        藥袋類型 = phaOrderClass.CD_FROM,
+                        藥袋類型 = phaOrderClass.CD_CANCEL,
                         //病房 = orderlistClass.病房,
                         床號 = phaOrderClass.ST_BEDNO,
                         狀態 = "未過帳"
                     };
+                    if(orderClass.藥袋類型 == "N")
+                    {
+                        orderClass.藥袋類型 = "New";
+                    }
+                    else
+                    {
+                        orderClass.藥袋類型 = "DC";
+                    }
                     orderClasses.Add(orderClass);
                 }
                 
