@@ -17,7 +17,7 @@ namespace DB2VM_API.Controller._API_處方取得
     public class BBAR : ControllerBase
     {
         static public string API_Server = "http://127.0.0.1:4433";
-        static public string Server = "127.0.0.1";
+        static public string Server = "220.135.128.247";
         static public string DB = "dbvm_his";
         static public string UserName = "his_user";
         static public string Password = "hson11486";
@@ -81,17 +81,21 @@ namespace DB2VM_API.Controller._API_處方取得
                         //藥袋類型 = phaOrderClass.CD_CANCEL,
                         //病房 = orderlistClass.病房,
                         床號 = phaOrderClass.ST_BEDNO,
-                        狀態 = "未過帳"
+                        //狀態 = "未過帳"
                     };
                     string 批序 = phaOrderClass.DATETIMESEQ;
                     string 藥袋狀態 = phaOrderClass.CD_CANCEL;
                     if (藥袋狀態 == "N")
                     {
                         藥袋狀態 = "NEW";
+                        orderClass.狀態 = "未過帳";
                     }
                     else
                     {
                         藥袋狀態 = "DC";
+                        orderClass.狀態 = "已過帳";
+                        orderClass.實際調劑量 = "0";
+
                     }
                     orderClass.批序 = $"{批序}-[{藥袋狀態}]";
                     orderClasses.Add(orderClass);
@@ -101,8 +105,15 @@ namespace DB2VM_API.Controller._API_處方取得
 
             
                 //List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
+                if(orderClasses.Count == 0 )
+                {
+                    returnData.Code = 200;
+                    returnData.Result = $"此條碼無資料";
+                    return returnData.JsonSerializationt(true);
+                }
+
                 returnData returnData_update_order = OrderClass.update_order_list_new(API_Server, orderClasses);
-                if(returnData_update_order.Code != 200) return returnData_update_order.JsonSerializationt(true);
+                if (returnData_update_order.Code != 200) return returnData_update_order.JsonSerializationt(true);
                 List<OrderClass> out_OrderClass = returnData_update_order.Data.ObjToClass<List<OrderClass>>();
 
 
