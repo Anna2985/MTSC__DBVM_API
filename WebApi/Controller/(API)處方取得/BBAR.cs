@@ -53,8 +53,8 @@ namespace DB2VM_API.Controller._API_處方取得
                     if (phaOrderClass.CD_FROM == "O") phaOrderClass.CD_FROM = "門診";
                     if (phaOrderClass.CD_FROM == "E") phaOrderClass.CD_FROM = "急診";
                     if (phaOrderClass.CD_FROM == "I") phaOrderClass.CD_FROM = "住院";
-                    if (phaOrderClass.CD_CANCEL == "N") phaOrderClass.CD_FROM = "New";
-                    if (phaOrderClass.CD_CANCEL == "Y") phaOrderClass.CD_FROM = "DC";
+                    //if (phaOrderClass.CD_CANCEL == "N") phaOrderClass.CD_FROM = "New";
+                    //if (phaOrderClass.CD_CANCEL == "Y") phaOrderClass.CD_FROM = "DC";
                     string dateTime = $"{phaOrderClass.DM_DRUG.Substring(0,4)}-{phaOrderClass.DM_DRUG.Substring(4, 2)}-{phaOrderClass.DM_DRUG.Substring(6, 2)}" +
                         $" {phaOrderClass.DM_DRUG.Substring(8, 2)}:{phaOrderClass.DM_DRUG.Substring(10, 2)}:{phaOrderClass.DM_DRUG.Substring(12, 2)}";
                     if(phaOrderClass.CD_CANCEL == "Y")
@@ -66,6 +66,7 @@ namespace DB2VM_API.Controller._API_處方取得
                         PRI_KEY = BarCode,
                         藥袋條碼 = BarCode,
                         開方日期 = dateTime,
+                        藥袋類型 = phaOrderClass.CD_FROM,
                         病歷號 = phaOrderClass.ID_PATIENT,
                         領藥號 = phaOrderClass.IT_DRUGNO,
                         病人姓名 = phaOrderClass.NM_PATIENT,
@@ -76,30 +77,38 @@ namespace DB2VM_API.Controller._API_處方取得
                         途徑 = phaOrderClass.ST_PATH,
                         交易量 = $"-{phaOrderClass.DB_AMOUNT}",
                         //交易量 = ((phaOrderClass.DB_AMOUNT).ToString(),
-                        批序 = phaOrderClass.DATETIMESEQ,
-                        藥袋類型 = phaOrderClass.CD_CANCEL,
+                        //批序 = phaOrderClass.DATETIMESEQ,
+                        //藥袋類型 = phaOrderClass.CD_CANCEL,
                         //病房 = orderlistClass.病房,
                         床號 = phaOrderClass.ST_BEDNO,
                         狀態 = "未過帳"
                     };
-                    if(orderClass.藥袋類型 == "N")
+                    string 批序 = phaOrderClass.DATETIMESEQ;
+                    string 藥袋狀態 = phaOrderClass.CD_CANCEL;
+                    if (藥袋狀態 == "N")
                     {
-                        orderClass.藥袋類型 = "New";
+                        藥袋狀態 = "NEW";
                     }
                     else
                     {
-                        orderClass.藥袋類型 = "DC";
+                        藥袋狀態 = "DC";
                     }
+                    orderClass.批序 = $"{批序}-[{藥袋狀態}]";
                     orderClasses.Add(orderClass);
                 }
                 
 
 
             
-                List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
-                returnData.Data = update_OrderClass;
+                //List<OrderClass> update_OrderClass = OrderClass.update_order_list(API_Server, orderClasses);
+                returnData returnData_update_order = OrderClass.update_order_list_new(API_Server, orderClasses);
+                if(returnData_update_order.Code != 200) return returnData_update_order.JsonSerializationt(true);
+                List<OrderClass> out_OrderClass = returnData_update_order.Data.ObjToClass<List<OrderClass>>();
+
+
+                returnData.Data = out_OrderClass;
                 returnData.Code = 200;
-                returnData.Result = $"取得醫令資料{update_OrderClass.Count}筆資料";
+                returnData.Result = $"取得醫令資料{out_OrderClass.Count}筆資料";
                 return returnData.JsonSerializationt(true);
             }
             catch(Exception ex)
