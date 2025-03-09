@@ -17,6 +17,8 @@ namespace DB2VM_API.Controller._API_處方取得
     public class BBAR : ControllerBase
     {
         static public string API_Server = "http://127.0.0.1:4433";
+        //static public string API_Server = "https://www.kutech.tw:4443";
+
         static public string Server = "127.0.0.1";
         static public string DB = "dbvm_his";
         static public string UserName = "his_user";
@@ -53,6 +55,12 @@ namespace DB2VM_API.Controller._API_處方取得
                     if (phaOrderClass.CD_FROM == "O") phaOrderClass.CD_FROM = "門診";
                     if (phaOrderClass.CD_FROM == "E") phaOrderClass.CD_FROM = "急診";
                     if (phaOrderClass.CD_FROM == "I") phaOrderClass.CD_FROM = "住院";
+                    if (phaOrderClass.CD_ORDER == "N") phaOrderClass.CD_ORDER = "門急";
+                    if (phaOrderClass.CD_ORDER == "B") phaOrderClass.CD_ORDER = "首日量";
+                    if (phaOrderClass.CD_ORDER == "S") phaOrderClass.CD_ORDER = "STAT";
+                    if (phaOrderClass.CD_ORDER == "M") phaOrderClass.CD_ORDER = "出院帶藥";
+
+
                     //if (phaOrderClass.CD_CANCEL == "N") phaOrderClass.CD_FROM = "New";
                     //if (phaOrderClass.CD_CANCEL == "Y") phaOrderClass.CD_FROM = "DC";
                     string dateTime = $"{phaOrderClass.DM_DRUG.Substring(0,4)}-{phaOrderClass.DM_DRUG.Substring(4, 2)}-{phaOrderClass.DM_DRUG.Substring(6, 2)}" +
@@ -66,14 +74,15 @@ namespace DB2VM_API.Controller._API_處方取得
                         PRI_KEY = BarCode,
                         藥袋條碼 = BarCode,
                         開方日期 = dateTime,
-                        藥袋類型 = phaOrderClass.CD_FROM,
+                        藥袋類型 = phaOrderClass.CD_ORDER,
+                        藥局代碼 = phaOrderClass.CD_FROM,
                         病歷號 = phaOrderClass.ID_PATIENT,
                         領藥號 = phaOrderClass.IT_DRUGNO,
                         病人姓名 = phaOrderClass.NM_PATIENT,
                         藥品碼 = phaOrderClass.ID_DRUG,
                         藥品名稱 = phaOrderClass.NM_DRUG,
                         單次劑量 = phaOrderClass.DB_DOSE,
-                        //頻次 = sql_medCar[0],
+                        頻次 = phaOrderClass.ST_FREQUENCY,
                         途徑 = phaOrderClass.ST_PATH,
                         交易量 = $"-{phaOrderClass.DB_AMOUNT}",
                         //交易量 = ((phaOrderClass.DB_AMOUNT).ToString(),
@@ -81,22 +90,20 @@ namespace DB2VM_API.Controller._API_處方取得
                         //藥袋類型 = phaOrderClass.CD_CANCEL,
                         //病房 = orderlistClass.病房,
                         床號 = phaOrderClass.ST_BEDNO,
-                        //狀態 = "未過帳"
+                        狀態 = "未過帳",
+                        備註 = ""
                     };
                     string 批序 = phaOrderClass.DATETIMESEQ;
                     string 藥袋狀態 = phaOrderClass.CD_CANCEL;
-                    if (藥袋狀態 == "N")
+                    if(藥袋狀態 == "N")
                     {
                         藥袋狀態 = "NEW";
-                        orderClass.狀態 = "未過帳";
                     }
                     else
                     {
                         藥袋狀態 = "DC";
-                        orderClass.狀態 = "已過帳";
-                        orderClass.實際調劑量 = "0";
-
                     }
+      
                     orderClass.批序 = $"{批序}-[{藥袋狀態}]";
                     orderClasses.Add(orderClass);
                 }
