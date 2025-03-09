@@ -17,7 +17,7 @@ namespace DB2VM_API.Controller._API_處方取得
     public class BBAR : ControllerBase
     {
         static public string API_Server = "http://127.0.0.1:4433";
-        static public string Server = "220.135.128.247";
+        static public string Server = "127.0.0.1";
         static public string DB = "dbvm_his";
         static public string UserName = "his_user";
         static public string Password = "hson11486";
