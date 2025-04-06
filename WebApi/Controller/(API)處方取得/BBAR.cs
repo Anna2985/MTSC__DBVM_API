@@ -93,6 +93,7 @@ namespace DB2VM_API.Controller._API_處方取得
                         狀態 = "未過帳",
                         備註 = ""
                     };
+                    if(orderClass.藥品碼 == "IMORP") orderClass.交易量 = Math.Floor(double.Parse(orderClass.交易量)).ToString();
                     string 批序 = phaOrderClass.DATETIMESEQ;
                     string 藥袋狀態 = phaOrderClass.CD_CANCEL;
                     if(藥袋狀態 == "N")
